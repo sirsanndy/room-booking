@@ -1,8 +1,11 @@
 package com.meetingroom.booking.dto;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class BookingResponse {
+public class BookingResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Long id;
     private Long roomId;
     private String roomName;

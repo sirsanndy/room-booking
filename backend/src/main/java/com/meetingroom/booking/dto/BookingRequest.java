@@ -3,9 +3,12 @@ package com.meetingroom.booking.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class BookingRequest {
+public class BookingRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @NotNull
     private Long roomId;
     

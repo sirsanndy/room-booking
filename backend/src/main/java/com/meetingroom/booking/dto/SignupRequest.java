@@ -4,7 +4,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public class SignupRequest {
+import java.io.Serializable;
+
+public class SignupRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     @NotBlank
     @Size(min = 3, max = 20)
     private String username;

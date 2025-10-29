@@ -1,8 +1,11 @@
 package com.meetingroom.booking.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class DashboardDTO {
+public class DashboardDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private List<CalendarEventDTO> events;
     private DashboardStats stats;
     

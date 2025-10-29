@@ -1,8 +1,11 @@
 package com.meetingroom.booking.dto;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public class JwtResponse {
+public class JwtResponse implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String token;
     private String type = "Bearer";
     private Long id;

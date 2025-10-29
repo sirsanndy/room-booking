@@ -3,6 +3,10 @@ package com.meetingroom.booking.dto;
 import java.time.LocalDateTime;
 
 public class MeetingRoomResponse {
+    private static final long serialVersionUID = 1L;
+
+    private Long roomId;
+    private String roomName;
     private Long id;
     private String name;
     private Integer capacity;
