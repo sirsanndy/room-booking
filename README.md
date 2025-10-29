@@ -20,7 +20,7 @@ A full-stack web application for booking meeting rooms with concurrency control 
 
 ### Backend
 - **Java 17**
-- **Spring Boot 3.2.0**
+- **Spring Boot 3.3.0**
 - **Spring Security** with JWT
 - **Spring Data JPA** with Hibernate
 - **PostgreSQL** database
