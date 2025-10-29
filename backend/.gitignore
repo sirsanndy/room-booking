@@ -3,3 +3,5 @@ target/**
 logs/**
 *.war
 *.jar
+*.log
+*.DS_Store
