@@ -1,1 +1,5 @@
 target/**
+.mvn/**
+logs/**
+*.war
+*.jar
