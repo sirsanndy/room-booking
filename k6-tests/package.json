@@ -1,0 +1,29 @@
+{
+  "name": "k6-tests",
+  "version": "1.0.0",
+  "description": "K6 performance tests for Meeting Room Booking System",
+  "scripts": {
+    "setup": "k6 run scripts/setup-users.js",
+    "test:auth": "k6 run tests/auth-test.js",
+    "test:race": "k6 run tests/race-condition-test.js",
+    "test:deadlock": "k6 run tests/deadlock-test.js",
+    "test:overlap": "k6 run tests/overlap-test.js",
+    "test:double": "k6 run tests/double-booking-test.js",
+    "test:stress": "k6 run tests/stress-test.js",
+    "test:all": "./run-all-tests.sh",
+    "report:generate": "node scripts/generate-html-report.js",
+    "report:open": "open results/latest/report.html || xdg-open results/latest/report.html"
+  },
+  "keywords": [
+    "k6",
+    "performance",
+    "load-testing",
+    "stress-testing",
+    "concurrency"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "handlebars": "^4.7.8"
+  }
+}
