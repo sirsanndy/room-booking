@@ -1,6 +1,7 @@
 target/**
 .mvn/**
 **/logs/**
+logs/**
 *.war
 *.jar
 *.log
