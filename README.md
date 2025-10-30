@@ -19,7 +19,7 @@ A full-stack web application for booking meeting rooms with concurrency control 
 ## Technology Stack
 
 ### Backend
-- **Java 17**
+- **Java 21**
 - **Spring Boot 3.3.0**
 - **Spring Security** with JWT
 - **Spring Data JPA** with Hibernate
@@ -35,7 +35,7 @@ A full-stack web application for booking meeting rooms with concurrency control 
 
 ## Prerequisites
 
-- Java 17 or higher
+- Java 21 or higher
 - Node.js 18 or higher
 - PostgreSQL 15 or higher (or Docker)
 - Maven 3.8 or higher
@@ -200,11 +200,59 @@ npm run build
 
 ## Testing
 
+### Manual Testing
+
 Test the race condition prevention:
 1. Open two browser windows
 2. Login as different users
 3. Try to book the same room for overlapping times
 4. Only one booking should succeed
+
+### Automated Performance Testing
+
+**k6 Load Testing Suite** - Professional performance testing with 1000+ concurrent users:
+
+```bash
+cd k6-tests
+
+# Install k6
+brew install k6
+
+# Setup test users (one-time)
+k6 run scripts/setup-users.js
+
+# Run individual tests
+k6 run tests/race-condition-test.js    # Race condition (30s)
+k6 run tests/deadlock-test.js           # Deadlock prevention (70s)
+k6 run tests/overlap-test.js            # Overlap detection (30s)
+k6 run tests/double-booking-test.js     # Double booking (60s)
+k6 run tests/stress-test.js             # Full stress test (10m)
+
+# Or run all tests
+./run-all-tests.sh
+```
+
+**Test Coverage:**
+- ✅ Race condition prevention (100 concurrent users)
+- ✅ Deadlock prevention (200 users ramping)
+- ✅ Overlap booking detection (50 users)
+- ✅ Double booking prevention (100 users)
+- ✅ Comprehensive stress test (1000 users)
+
+📖 **Documentation:** [k6-tests/README.md](k6-tests/README.md)
+
+### Kubernetes Testing (Alternative)
+
+Node.js-based functional tests for Kubernetes environments:
+
+```bash
+cd k8s-tests
+npm install
+npm run setup:users
+npm test
+```
+
+📖 **Documentation:** [k8s-tests/README.md](k8s-tests/README.md)
 
 ## License
 
