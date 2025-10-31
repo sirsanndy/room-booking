@@ -4,6 +4,13 @@ import com.meetingroom.booking.dto.BookingRequest;
 import com.meetingroom.booking.dto.BookingResponse;
 import com.meetingroom.booking.dto.MessageResponse;
 import com.meetingroom.booking.service.BookingService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +25,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/bookings")
 @CrossOrigin(origins = "*", maxAge = 3600)
+@Tag(name = "Bookings", description = "Meeting room booking management endpoints")
+@SecurityRequirement(name = "Bearer Authentication")
 public class BookingController {
     private static final Logger LOG = LoggerFactory.getLogger(BookingController.class);
     
@@ -28,6 +37,15 @@ public class BookingController {
     }
 
     @PostMapping
+    @Operation(summary = "Create booking", description = "Create a new meeting room booking")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Booking created successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = BookingResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid booking request",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
+        @ApiResponse(responseCode = "409", description = "Booking conflict",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class)))
+    })
     public ResponseEntity<?> createBooking(
             @Valid @RequestBody BookingRequest bookingRequest,
             Authentication authentication) {
@@ -49,6 +67,8 @@ public class BookingController {
     }
     
     @GetMapping("/my-bookings")
+    @Operation(summary = "Get my bookings", description = "Get all bookings for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully")
     public ResponseEntity<List<BookingResponse>> getMyBookings(Authentication authentication) {
         String username = authentication.getName();
         LOG.info("Fetching bookings for user: {}", username);
@@ -58,6 +78,8 @@ public class BookingController {
     }
     
     @GetMapping("/room/{roomId}")
+    @Operation(summary = "Get bookings by room", description = "Get upcoming bookings for a specific room")
+    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully")
     public ResponseEntity<List<BookingResponse>> getBookingsByRoom(@PathVariable Long roomId) {
         LOG.info("Fetching bookings for room: {}", roomId);
         List<BookingResponse> bookings = bookingService.getUpcomingBookingsByRoom(roomId);
@@ -66,6 +88,8 @@ public class BookingController {
     }
     
     @GetMapping
+    @Operation(summary = "Get all upcoming bookings", description = "Get all upcoming bookings in the system")
+    @ApiResponse(responseCode = "200", description = "Bookings retrieved successfully")
     public ResponseEntity<List<BookingResponse>> getAllUpcomingBookings() {
         LOG.info("Fetching all upcoming bookings");
         List<BookingResponse> bookings = bookingService.getAllUpcomingBookings();
@@ -74,6 +98,13 @@ public class BookingController {
     }
     
     @DeleteMapping("/{bookingId}")
+    @Operation(summary = "Cancel booking", description = "Cancel a booking by ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Booking cancelled successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Cannot cancel booking",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class)))
+    })
     public ResponseEntity<?> cancelBooking(
             @PathVariable Long bookingId,
             Authentication authentication) {
