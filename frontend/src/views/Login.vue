@@ -36,6 +36,9 @@
         <p>Username: john | Password: password123</p>
         <p>Username: jane | Password: password123</p>
       </div>
+      <div class="security-notice">
+        <p>🔒 Your credentials are encrypted during transmission</p>
+      </div>
     </div>
   </div>
 </template>
@@ -153,5 +156,20 @@ input:focus {
 
 .demo-credentials p {
   margin: 0.25rem 0;
+}
+
+.security-notice {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  text-align: center;
+  border-left: 3px solid #27ae60;
+}
+
+.security-notice p {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 0.85rem;
 }
 </style>
