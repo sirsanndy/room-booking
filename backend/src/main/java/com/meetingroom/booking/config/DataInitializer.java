@@ -35,9 +35,13 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (userRepository.count() == 0) {
+            // Frontend sends SHA-256 hashed password: "password123" -> "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f"
+            // So we need to store BCrypt(SHA-256("password123")) in database
+            String sha256HashedPassword = "ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f";
+            
             User user1 = new User();
             user1.setUsername("john");
-            user1.setPassword(passwordEncoder.encode("password123"));
+            user1.setPassword(passwordEncoder.encode(sha256HashedPassword));
             user1.setEmail("john@example.com");
             user1.setFullName("John Doe");
             Set<String> roles1 = new HashSet<>();
@@ -48,7 +52,7 @@ public class DataInitializer implements CommandLineRunner {
             
             User user2 = new User();
             user2.setUsername("jane");
-            user2.setPassword(passwordEncoder.encode("password123"));
+            user2.setPassword(passwordEncoder.encode(sha256HashedPassword));
             user2.setEmail("jane@example.com");
             user2.setFullName("Jane Smith");
             Set<String> roles2 = new HashSet<>();
@@ -58,6 +62,7 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(user2);
             
             System.out.println("Sample users created: john/password123, jane/password123");
+            System.out.println("Note: Passwords are stored as BCrypt(SHA-256(password))");
         }
         
         // Initialize sample meeting rooms if not exists
