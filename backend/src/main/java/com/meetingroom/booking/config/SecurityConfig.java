@@ -41,9 +41,25 @@ public class SecurityConfig {
         this.allowedOrigins = allowedOrigins;
     }
     
+    /**
+     * Password encoder bean using BCrypt with strength 12
+     * 
+     * Security Model:
+     * 1. Frontend sends SHA-256 hash (prevents plaintext transmission)
+     * 2. Backend applies BCrypt with automatic salting (stored in database)
+     * 3. Final stored password: BCrypt(SHA-256(user_password))
+     * 
+     * BCrypt Benefits:
+     * - Automatic salt generation (unique per password)
+     * - Adaptive hashing (can increase strength over time)
+     * - Slow by design (prevents brute force attacks)
+     * 
+     * Strength=12 means 2^12 (4096) hashing rounds
+     * Higher strength = more secure but slower (10-12 recommended for production)
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
     
     @Bean
