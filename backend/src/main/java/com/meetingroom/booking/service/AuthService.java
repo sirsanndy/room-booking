@@ -8,7 +8,6 @@ import com.meetingroom.booking.repository.UserRepository;
 import com.meetingroom.booking.security.JwtTokenProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -53,6 +52,7 @@ public class AuthService {
         user.setUsername(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
         user.setFullName(signupRequest.getFullName());
+
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         
         Set<String> roles = new HashSet<>();
@@ -61,10 +61,12 @@ public class AuthService {
         user.setEnabled(true);
         
         userRepository.save(user);
+        LOG.info("User registered successfully with BCrypt-salted password: {}", signupRequest.getUsername());
     }
     
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
         LOG.info("Authenticating user request: {}", loginRequest.getUsername());
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -78,6 +80,8 @@ public class AuthService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+        
+        LOG.info("User authenticated successfully: {}", loginRequest.getUsername());
         
         return new JwtResponse(
                 jwt,
