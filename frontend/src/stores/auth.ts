@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import apiService from '@/services/api'
 import type { User, LoginRequest, SignupRequest, AuthResponse } from '@/types'
+import { hashPassword } from '@/utils/security'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -27,7 +28,13 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
       
-      const response: AuthResponse = await apiService.login(credentials)
+      // Hash password before sending to server for added security
+      const hashedCredentials = {
+        username: credentials.username,
+        password: hashPassword(credentials.password)
+      }
+      
+      const response: AuthResponse = await apiService.login(hashedCredentials)
       
       token.value = response.token
       user.value = {
@@ -54,7 +61,13 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true
       error.value = null
       
-      await apiService.signup(userData)
+      // Hash password before sending to server for added security
+      const hashedUserData = {
+        ...userData,
+        password: hashPassword(userData.password)
+      }
+      
+      await apiService.signup(hashedUserData)
       
       return true
     } catch (err: any) {
