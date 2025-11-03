@@ -2,11 +2,20 @@ import http from 'k6/http';
 import { check, group, sleep } from 'k6';
 import { SharedArray } from 'k6/data';
 import { Counter, Rate, Trend } from 'k6/metrics';
+import crypto from 'k6/crypto';
 
 // Configuration
 const BASE_URL = __ENV.API_URL || 'http://localhost:8080';
 const TOTAL_USERS = 300;
 const REQUEST_TIMEOUT = '15m'; // 15 minutes timeout
+
+/**
+ * Hash password using SHA-256
+ * This matches the frontend security implementation
+ */
+function hashPassword(password) {
+  return crypto.sha256(password, 'hex');
+}
 
 // Custom Metrics
 const raceLockSuccessRate = new Rate('race_lock_success_rate');
@@ -40,7 +49,7 @@ export function registerUser(user) {
   const payload = JSON.stringify({
     username: user.username,
     email: user.email,
-    password: user.password,
+    password: hashPassword(user.password), // Hash password with SHA-256
     fullName: user.fullName,
   });
 
@@ -67,7 +76,7 @@ export function registerUser(user) {
 export function login(username, password) {
   const payload = JSON.stringify({
     username: username,
-    password: password,
+    password: hashPassword(password), // Hash password with SHA-256
   });
 
   const params = {
