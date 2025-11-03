@@ -14,7 +14,7 @@ public class SignupRequest implements Serializable {
     private String username;
     
     @NotBlank
-    @Size(min = 6, max = 40)
+    @Size(min = 6, max = 255)
     private String password;
     
     @NotBlank
