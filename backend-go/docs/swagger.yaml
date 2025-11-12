@@ -1,0 +1,477 @@
+basePath: /api
+definitions:
+  handler.AuthResponse:
+    properties:
+      token:
+        type: string
+      user: {}
+    type: object
+  handler.CreateBookingRequest:
+    properties:
+      description:
+        type: string
+      endTime:
+        type: string
+      roomId:
+        type: integer
+      startTime:
+        type: string
+      title:
+        type: string
+    type: object
+  handler.CreateRoomRequest:
+    properties:
+      available:
+        type: boolean
+      capacity:
+        type: integer
+      features:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+    type: object
+  handler.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  handler.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  handler.SignupRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  models.Booking:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: integer
+      roomId:
+        type: integer
+      startTime:
+        type: string
+      status:
+        $ref: '#/definitions/models.BookingStatus'
+      title:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+      version:
+        description: For optimistic locking
+        type: integer
+    type: object
+  models.BookingStatus:
+    enum:
+    - CONFIRMED
+    - CANCELLED
+    type: string
+    x-enum-varnames:
+    - BookingStatusConfirmed
+    - BookingStatusCancelled
+  models.BookingWithDetails:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      endTime:
+        type: string
+      id:
+        type: integer
+      room:
+        $ref: '#/definitions/models.MeetingRoom'
+      roomId:
+        type: integer
+      startTime:
+        type: string
+      status:
+        $ref: '#/definitions/models.BookingStatus'
+      title:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+      userId:
+        type: integer
+      version:
+        description: For optimistic locking
+        type: integer
+    type: object
+  models.DashboardStats:
+    properties:
+      activeBookings:
+        type: integer
+      availableRooms:
+        type: integer
+      bookingsByRoom:
+        additionalProperties:
+          type: integer
+        type: object
+      bookingsByStatus:
+        additionalProperties:
+          type: integer
+        type: object
+      recentBookings:
+        items:
+          $ref: '#/definitions/models.BookingWithDetails'
+        type: array
+      totalBookings:
+        type: integer
+      totalRooms:
+        type: integer
+      upcomingBookings:
+        items:
+          $ref: '#/definitions/models.BookingWithDetails'
+        type: array
+      upcomingHolidays:
+        items:
+          $ref: '#/definitions/models.Holiday'
+        type: array
+    type: object
+  models.Holiday:
+    properties:
+      date:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        description: e.g., "PUBLIC", "COMPANY"
+        type: string
+    type: object
+  models.MeetingRoom:
+    properties:
+      available:
+        type: boolean
+      capacity:
+        type: integer
+      createdAt:
+        type: string
+      features:
+        description: Stored as comma-separated string
+        type: string
+      id:
+        type: integer
+      location:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  models.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      enabled:
+        type: boolean
+      fullName:
+        type: string
+      id:
+        type: integer
+      roles:
+        description: Stored as comma-separated string
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: API for managing meeting room bookings, including authentication, room
+    management, and booking operations.
+  title: Meeting Room Booking API
+  version: "1.0"
+paths:
+  /auth/signin:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and get JWT token
+      parameters:
+      - description: Login request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful
+          schema:
+            $ref: '#/definitions/handler.AuthResponse'
+        "400":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: User login
+      tags:
+      - Authentication
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user account
+      parameters:
+      - description: Signup request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.SignupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User registered successfully
+          schema:
+            $ref: '#/definitions/handler.AuthResponse'
+        "400":
+          description: Bad request - Username or email already exists
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Register new user
+      tags:
+      - Authentication
+  /bookings:
+    post:
+      consumes:
+      - application/json
+      description: Create a new meeting room booking
+      parameters:
+      - description: Booking details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateBookingRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Booking created successfully
+          schema:
+            $ref: '#/definitions/models.Booking'
+        "400":
+          description: Invalid booking request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "409":
+          description: Booking conflict
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create booking
+      tags:
+      - Bookings
+  /bookings/{id}:
+    delete:
+      description: Cancel a booking by ID
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Booking version for optimistic locking
+        in: query
+        name: version
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Booking cancelled successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Cannot cancel booking
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Cancel booking
+      tags:
+      - Bookings
+  /bookings/my-bookings:
+    get:
+      description: Get all bookings for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bookings retrieved successfully
+          schema:
+            items:
+              $ref: '#/definitions/models.BookingWithDetails'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get my bookings
+      tags:
+      - Bookings
+  /bookings/room/{id}:
+    get:
+      description: Get upcoming bookings for a specific room
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Start time (RFC3339)
+        in: query
+        name: start
+        required: true
+        type: string
+      - description: End time (RFC3339)
+        in: query
+        name: end
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Bookings retrieved successfully
+          schema:
+            items:
+              $ref: '#/definitions/models.BookingWithDetails'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get bookings by room
+      tags:
+      - Bookings
+  /dashboard:
+    get:
+      description: Get dashboard data including calendar events and statistics
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Dashboard data retrieved successfully
+          schema:
+            $ref: '#/definitions/models.DashboardStats'
+      security:
+      - BearerAuth: []
+      summary: Get dashboard data
+      tags:
+      - Dashboard
+  /rooms:
+    get:
+      description: Retrieve all meeting rooms or filter by availability
+      parameters:
+      - description: Filter by availability
+        in: query
+        name: available
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Rooms retrieved successfully
+          schema:
+            items:
+              $ref: '#/definitions/models.MeetingRoom'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Get all rooms
+      tags:
+      - Meeting Rooms
+    post:
+      consumes:
+      - application/json
+      description: Create a new meeting room (Admin only)
+      parameters:
+      - description: Room details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateRoomRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Room created successfully
+          schema:
+            $ref: '#/definitions/models.MeetingRoom'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "403":
+          description: Admin access required
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create room
+      tags:
+      - Meeting Rooms
+  /rooms/{id}:
+    get:
+      description: Retrieve a specific meeting room by ID
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Room found
+          schema:
+            $ref: '#/definitions/models.MeetingRoom'
+        "404":
+          description: Room not found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get room by ID
+      tags:
+      - Meeting Rooms
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
