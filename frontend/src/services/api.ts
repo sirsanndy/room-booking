@@ -40,9 +40,15 @@ class ApiService {
       (response) => response,
       (error: AxiosError) => {
         if (error.response?.status === 401) {
+          // Clear all auth data
           localStorage.removeItem('token')
+          localStorage.removeItem('tokenExpiresAt')
           localStorage.removeItem('user')
-          window.location.href = '/login'
+          
+          // Only redirect if not already on login page
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login'
+          }
         }
         return Promise.reject(error)
       }

@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <SessionExpirationNotice v-if="isAuthenticated" />
     <nav v-if="isAuthenticated" class="navbar">
       <div class="nav-container">
         <h1 class="logo">Meeting Room Booking</h1>
@@ -21,6 +22,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import SessionExpirationNotice from './components/SessionExpirationNotice.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

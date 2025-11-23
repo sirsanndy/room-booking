@@ -25,6 +25,7 @@ export interface AuthResponse {
   username: string
   email: string
   roles: string[]
+  expiresAt: number // Timestamp in milliseconds when token expires
 }
 
 export interface MeetingRoom {
