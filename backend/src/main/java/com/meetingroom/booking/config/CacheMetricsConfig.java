@@ -6,6 +6,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -23,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Configuration
 public class CacheMetricsConfig {
+    private static final Logger LOG = LoggerFactory.getLogger(CacheMetricsConfig.class);
 
     /**
      * Aspect to intercept cache operations and record metrics
@@ -48,7 +52,7 @@ public class CacheMetricsConfig {
             MethodSignature signature = (MethodSignature) joinPoint.getSignature();
             Method method = signature.getMethod();
             Cacheable cacheable = method.getAnnotation(Cacheable.class);
-
+            LOG.info("Check cache hit {}", Objects.nonNull(cacheable)? cacheable.value(): null);
             if (cacheable != null && cacheable.value().length > 0) {
                 String cacheName = cacheable.value()[0];
                 
@@ -64,15 +68,16 @@ public class CacheMetricsConfig {
                     isHit = (existingValue != null);
                 }
                 
-                // Record metric
                 if (isHit) {
+                    LOG.info("Cache hit {}", cacheKey);
                     getHitCounter(cacheName).increment();
                 } else {
+                    LOG.info("Cache miss {}", cacheKey);
                     getMissCounter(cacheName).increment();
-                    getPutCounter(cacheName).increment(); // A miss means a put will happen
+                    LOG.info("Cache put {}", cacheKey);
+                    getPutCounter(cacheName).increment();
                 }
                 
-                // Execute method (cache will handle the actual caching)
                 return joinPoint.proceed();
             }
 
@@ -95,7 +100,6 @@ public class CacheMetricsConfig {
         }
 
         private String generateCacheKey(ProceedingJoinPoint joinPoint) {
-            // Generate a simple cache key from method name and arguments
             StringBuilder key = new StringBuilder(joinPoint.getSignature().getName());
             Object[] args = joinPoint.getArgs();
             if (args != null && args.length > 0) {
