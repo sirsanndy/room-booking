@@ -77,6 +77,10 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
         
+        // Calculate token expiration time
+        long expirationTime = tokenProvider.getExpirationTime();
+        long expiresAt = System.currentTimeMillis() + expirationTime;
+        
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userRepository.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -85,10 +89,12 @@ public class AuthService {
         
         return new JwtResponse(
                 jwt,
+                "Bearer",
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getRoles()
+                user.getRoles(),
+                expiresAt
         );
     }
 }

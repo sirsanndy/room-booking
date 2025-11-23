@@ -12,14 +12,16 @@ public class JwtResponse implements Serializable {
     private String username;
     private String email;
     private Set<String> roles;
+    private Long expiresAt; // Timestamp in milliseconds when token expires
     
-    public JwtResponse(String token, String type, Long id, String username, String email, Set<String> roles) {
+    public JwtResponse(String token, String type, Long id, String username, String email, Set<String> roles, Long expiresAt) {
         this.token = token;
         this.type = type;
         this.id = id;
         this.username = username;
         this.email = email;
         this.roles = roles;
+        this.expiresAt = expiresAt;
     }
 
     public String getToken() {
@@ -70,11 +72,11 @@ public class JwtResponse implements Serializable {
         this.roles = roles;
     }
 
-    public JwtResponse(String token, Long id, String username, String email, Set<String> roles) {
-        this.token = token;
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.roles = roles;
+    public Long getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(Long expiresAt) {
+        this.expiresAt = expiresAt;
     }
 }
