@@ -107,45 +107,78 @@ public class CacheMetricsConfig {
         }
 
         private Counter getHitCounter(String cacheName) {
-            return hitCounters.computeIfAbsent(cacheName, name -> 
-                Counter.builder("cache_gets")
+            return hitCounters.computeIfAbsent(cacheName, name -> {
+                String service = getServiceName(name);
+                return Counter.builder("cache_gets")
                     .tag("cache", name)
+                    .tag("service", service)
                     .tag("result", "hit")
                     .tag("cacheManager", "cacheManager")
-                    .description("Number of cache hits")
-                    .register(meterRegistry)
-            );
+                    .description("Number of cache hits by service")
+                    .register(meterRegistry);
+            });
         }
 
         private Counter getMissCounter(String cacheName) {
-            return missCounters.computeIfAbsent(cacheName, name -> 
-                Counter.builder("cache_gets")
+            return missCounters.computeIfAbsent(cacheName, name -> {
+                String service = getServiceName(name);
+                return Counter.builder("cache_gets")
                     .tag("cache", name)
+                    .tag("service", service)
                     .tag("result", "miss")
                     .tag("cacheManager", "cacheManager")
-                    .description("Number of cache misses")
-                    .register(meterRegistry)
-            );
+                    .description("Number of cache misses by service")
+                    .register(meterRegistry);
+            });
         }
 
         private Counter getPutCounter(String cacheName) {
-            return putCounters.computeIfAbsent(cacheName, name -> 
-                Counter.builder("cache_puts")
+            return putCounters.computeIfAbsent(cacheName, name -> {
+                String service = getServiceName(name);
+                return Counter.builder("cache_puts")
                     .tag("cache", name)
+                    .tag("service", service)
                     .tag("cacheManager", "cacheManager")
-                    .description("Number of cache puts")
-                    .register(meterRegistry)
-            );
+                    .description("Number of cache puts by service")
+                    .register(meterRegistry);
+            });
         }
 
         private Counter getEvictionCounter(String cacheName) {
-            return evictionCounters.computeIfAbsent(cacheName, name ->
-                Counter.builder("cache_evictions")
+            return evictionCounters.computeIfAbsent(cacheName, name -> {
+                String service = getServiceName(name);
+                return Counter.builder("cache_evictions")
                     .tag("cache", name)
+                    .tag("service", service)
                     .tag("cacheManager", "cacheManager")
-                    .description("Number of cache evictions")
-                    .register(meterRegistry)
-            );
+                    .description("Number of cache evictions by service")
+                    .register(meterRegistry);
+            });
+        }
+
+        /**
+         * Map cache names to service names for better categorization
+         */
+        private String getServiceName(String cacheName) {
+            switch (cacheName) {
+                case "users":
+                    return "UserService";
+                case "rooms":
+                case "availableRooms":
+                case "meetingRooms":
+                    return "MeetingRoomService";
+                case "upcomingBookings":
+                case "roomBookings":
+                case "userBookings":
+                    return "BookingService";
+                case "holidays":
+                case "upcomingHolidays":
+                    return "HolidayService";
+                case "dashboardData":
+                    return "DashboardService";
+                default:
+                    return "UnknownService";
+            }
         }
     }
 }
